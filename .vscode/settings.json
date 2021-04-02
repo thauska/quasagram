@@ -1,0 +1,9 @@
+{
+  
+  "vetur.experimental.templateInterpolationService": true,
+  "splitHTMLAttributes.sortOrder": [
+    "^v-if", "^v-else", "^v-show", "^v-model", "^v-for", "^:key", "^key", "^v-", "^:", "^@click", "^@", "^id", "^class", "^.*=\""
+  ],
+  "splitHTMLAttributes.closingBracketOnNewLine": true,
+  "editor.wordWrap": "on"
+}
