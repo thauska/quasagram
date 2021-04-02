@@ -45,7 +45,7 @@
       </q-tabs>
     </q-footer>
 
-    <q-page-container>
+    <q-page-container class="constrain bg-grey-1">
       <router-view />
     </q-page-container>
   </q-layout>
