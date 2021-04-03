@@ -15,7 +15,7 @@ const app = express()
 app.get('/posts', (req, res) => {
     let posts = [
         {
-            caption: 'Golden Gate Bridge',
+            caption: 'Estação das Docas',
             location: 'Belém, Brazil'
         },
         {
