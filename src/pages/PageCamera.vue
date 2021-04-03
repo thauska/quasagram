@@ -41,17 +41,45 @@
       <div class="row justify-center q-ma-md">
         <q-input
           v-model="post.location"
+          :loading="locationLoading"
           class="col col-sm-6"
           label="Location"
           dense
         >
           <template v-slot:append>
-            <q-btn round dens flat icon="eva-navigation-2-outline" />
+            <q-btn
+              v-if="!locationLoading && locationSupported"
+              @click="getLocation"
+              icon="eva-navigation-2-outline"
+              dense
+              flat
+              round
+            />
           </template>
         </q-input>
+      <q-dialog v-model="dialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Erro!</div>
+          </q-card-section>
+          
+          <q-card-section class="q-pt-none">
+            Não foi possível pegar localização.
+          </q-card-section>
+          
+          <q-card-actions align="right">
+            <q-btn flat label="OK" color="primary" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
       </div>
       <div class="row justify-center q-mt-lg">
-        <q-btn color="grey-10" label="Post Image" rounded unelevated />
+        <q-btn
+          color="grey-10"
+          label="Post Image"
+          rounded
+          unelevated
+        />
       </div>
     </div>
   </q-page>
@@ -75,6 +103,14 @@ export default {
       imageCaptured: false,
       imageUpload: [],
       hasCameraSupport: true,
+      dialog: false,
+      locationLoading: false
+    }
+  },
+  computed: {
+    locationSupported() {
+      if('geolocation' in navigator) return true
+      return false
     }
   },
   methods: {
@@ -88,6 +124,7 @@ export default {
           this.$refs.video.srcObject = stream
         })
         .catch((error) => {
+          console.log(error)
           this.hasCameraSupport = false
         })
     },
@@ -97,7 +134,7 @@ export default {
       canvas.width = video.getBoundingClientRect().width
       canvas.height = video.getBoundingClientRect().height
 
-      let context = canvas.getContext("2d");
+      let context = canvas.getContext("2d")
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
       this.imageCaptured = true
 
@@ -113,7 +150,7 @@ export default {
 
       // upload image to canvas
       let reader = new FileReader()
-      reader.onload = event => {
+      reader.onload = (event) => {
         let img = new Image()
         img.onload = () => {
           canvas.width = img.width
@@ -124,17 +161,16 @@ export default {
         img.src = event.target.result
       }
       reader.readAsDataURL(file)
-
     },
     disableCamera() {
-      this.$refs.video.srcObject.getVideoTracks().forEach(track => {
+      this.$refs.video.srcObject.getVideoTracks().forEach((track) => {
         track.stop()
       })
     },
     dataURItoBlob(dataURI) {
       // URI to Blob
       let byteString = atob(dataURI.split(",")[1])
-      let mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0]
+      let mimeString = dataURI.split(",")[0].split(":")[1].split("")[0]
       let ab = new ArrayBuffer(byteString.length)
       let ia = new Uint8Array(ab)
       for (let i = 0; i < byteString.length; i++) {
@@ -143,12 +179,48 @@ export default {
       let blob = new Blob([ab], { type: mimeString })
       return blob
     },
+    getLocation() {
+      this.locationLoading = true
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          //console.log('position: ', position)
+          this.getCityAndCountry(position)
+        },
+        (err) => {
+          this.locationError()
+        },
+        { timeout: 7000 }
+      )
+    },
+    getCityAndCountry(position) {
+      let apiUrl = `https://geocode.xyz/${position.coords.latitude},${position.coords.longitude}?json=1`
+      this.$axios
+        .get(apiUrl)
+        .then((result) => {
+          //console.log('result: ', result)
+          this.locationSuccess(result)
+        })
+        .catch((err) => {
+          this.locationError()
+        })
+    },
+    locationSuccess(result) {
+      this.post.location = result.data.city
+      if (result.data.country) {
+        this.post.location += `, ${result.data.country}`
+      }
+      this.locationLoading = false
+    },
+    locationError() {
+      this.dialog = true
+      this.locationLoading = false
+    }
   },
   mounted() {
     this.initCamera()
   },
   beforeDestroy() {
-    if(this.hasCameraSupport) {
+    if (this.hasCameraSupport) {
       this.disableCamera()
     }
   }
