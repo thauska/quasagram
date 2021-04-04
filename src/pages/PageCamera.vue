@@ -74,7 +74,7 @@
         </q-dialog>
       </div>
       <div class="row justify-center q-mt-lg">
-        <q-btn color="grey-10" label="Post Image" rounded unelevated />
+        <q-btn @click="addPost" color="grey-10" label="Post Image" rounded unelevated />
       </div>
     </div>
   </q-page>
@@ -210,6 +210,21 @@ export default {
       this.dialog = true;
       this.locationLoading = false;
     },
+    addPost() {
+      // FormData handle with file upload
+      let formData = new FormData()
+      formData.append('id', this.post.id)
+      formData.append('caption', this.post.caption)
+      formData.append('location', this.post.location)
+      formData.append('date', this.post.date)
+      formData.append('file', this.post.photo, this.post.id + '.png')
+
+      this.$axios.post(`${ process.env.API }/createPost`, formData).then(res => {
+        console.log('response: ', res)
+      }).catch(err => {
+        console.log('error: ', err)
+      })
+    }
   },
   mounted() {
     this.initCamera();
