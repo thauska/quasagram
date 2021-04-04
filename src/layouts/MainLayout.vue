@@ -45,8 +45,8 @@
       </q-tabs>
     </q-footer>
 
-    <q-page-container class="constrain bg-grey-1">
-      <router-view />
+    <q-page-container class="bg-grey-1">
+      <router-view class="constrain" />
     </q-page-container>
   </q-layout>
 </template>
@@ -61,14 +61,14 @@ export default {
 </script>
 
 <style lang="sass">
-.q-toolbar
-  @media (min-width: $breakpoint-sm-min)
-    height: 70px
+  .q-toolbar
+    @media (min-width: $breakpoint-sm-min)
+      height: 70px
 
-.q-toolbar__title
-  font-size: 30px
-  @media (max-width: $breakpoint-xs-max)
-    text-align: center
+  .q-toolbar__title
+    font-size: 30px
+    @media (max-width: $breakpoint-xs-max)
+      text-align: center
 
   .q-footer
     .q-tab__icon

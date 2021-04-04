@@ -2,33 +2,39 @@
  * dependencies
  */
 const express = require('express')
+const admin = require('firebase-admin');
 
 /**
- * config - express
+ * config - express, firebase
  */
 const app = express()
+
+const serviceAccount = require('./serviceAccountKey.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
 
 /**
  * endpoints
  */
 
 app.get('/posts', (req, res) => {
-    let posts = [
-        {
-            caption: 'Estação das Docas',
-            location: 'Belém, Brazil'
-        },
-        {
-            caption: 'Ver-o-Rio',
-            location: 'Belém, Brazil'
-        },
-        {
-            caption: 'Mangal das Garças',
-            location: 'Belém, Brazil'
-        }
-    ]
+    res.set('Access-Control-Allow-Origin', '*')
 
-    res.send(posts)
+    let posts = []
+
+    db.collection('posts').orderBy('date', 'desc').get().then( snapshot =>{
+        snapshot.forEach((doc) => {
+            console.log(doc.id, '=>', doc.data())
+            posts.push(doc.data())
+        })
+        res.send(posts)
+    })
+
 })
 
 /**
